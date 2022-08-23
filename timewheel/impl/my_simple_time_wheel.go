@@ -21,8 +21,7 @@ func NewMySimpleTimeWheel(interval time.Duration, size uint64) *MySimpleTimeWhee
 
 type MySimpleTimeWheel struct {
 	timewheel.BasicTimeWheel
-	Slot     [][]*timewheel.DelayTask
-	timeUnit time.Duration
+	Slot [][]*timewheel.DelayTask
 
 	// todo
 	taskMap map[string]timewheel.DelayTask
