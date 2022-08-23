@@ -11,10 +11,12 @@ func main() {
 
 	wheel := impl.NewMySimpleTimeWheel(1*time.Second, 20)
 
-	task := &timewheel.DelayTask{
-		Interval: 3 * time.Second,
-		Job: func() {
-			handler.DoDelayBiz()
+	task := &timewheel.SimpleDelayTask{
+		BaseDelayTask: timewheel.BaseDelayTask{
+			Interval: 3 * time.Second,
+			Job: func() {
+				handler.DoDelayBiz()
+			},
 		},
 	}
 

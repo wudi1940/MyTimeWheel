@@ -15,23 +15,23 @@ func NewMySimpleTimeWheel(interval time.Duration, size uint64) *MySimpleTimeWhee
 			CurrentPoz: utils.TimeToSec(time.Now().Local()) % size,
 			Trigger:    time.NewTicker(interval),
 		},
-		Slot: make([][]*timewheel.DelayTask, size),
+		Slot: make([][]*timewheel.SimpleDelayTask, size),
 	}
 }
 
 type MySimpleTimeWheel struct {
 	timewheel.BasicTimeWheel
-	Slot [][]*timewheel.DelayTask
+	Slot [][]*timewheel.SimpleDelayTask
 
 	// todo
-	taskMap map[string]timewheel.DelayTask
+	taskMap map[string]timewheel.SimpleDelayTask
 }
 
 func (tw *MySimpleTimeWheel) Start() {
 	ticker := tw.Trigger.(*time.Ticker)
 	// init tw
 	for i := 0; i < int(tw.Size); i++ {
-		tw.Slot[i] = make([]*timewheel.DelayTask, 0, 10)
+		tw.Slot[i] = make([]*timewheel.SimpleDelayTask, 0, 10)
 	}
 
 	go func() {
@@ -50,7 +50,7 @@ func (tw *MySimpleTimeWheel) run() {
 	oriTaskList := tw.Slot[tw.CurrentPoz]
 
 	if len(oriTaskList) > 0 {
-		newTaskList := make([]*timewheel.DelayTask, 0, len(oriTaskList))
+		newTaskList := make([]*timewheel.SimpleDelayTask, 0, len(oriTaskList))
 		for _, task := range oriTaskList {
 			if task.Circle == 0 {
 				go task.Job()
@@ -66,12 +66,13 @@ func (tw *MySimpleTimeWheel) run() {
 	tw.CurrentPoz = (tw.CurrentPoz + 1) % tw.Size
 }
 
-func (tw MySimpleTimeWheel) AddTask(task *timewheel.DelayTask) {
-	task.Circle = uint64(task.Interval/tw.Interval) / tw.Size
-	task.Pos = (tw.CurrentPoz + uint64(task.Interval/tw.Interval)) % tw.Size
+func (tw MySimpleTimeWheel) AddTask(task interface{}) {
+	iTask := task.(*timewheel.SimpleDelayTask)
+	iTask.Circle = uint64(iTask.Interval/tw.Interval) / tw.Size
+	iTask.Pos = (tw.CurrentPoz + uint64(iTask.Interval/tw.Interval)) % tw.Size
 
-	fmt.Println("Add New Task !!, Now Time is: ", time.Now().Local(), " CurrentPoz: ", tw.CurrentPoz, " TaskPoz: ", task.Pos)
-	tw.Slot[task.Pos] = append(tw.Slot[task.Pos], task)
+	fmt.Println("Add New Task !!, Now Time is: ", time.Now().Local(), " CurrentPoz: ", tw.CurrentPoz, " TaskPoz: ", iTask.Pos)
+	tw.Slot[iTask.Pos] = append(tw.Slot[iTask.Pos], iTask)
 }
 
 func (tw MySimpleTimeWheel) RemoveTask() {
