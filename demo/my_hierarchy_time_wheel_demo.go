@@ -14,7 +14,15 @@ func main() {
 
 	ticker := time.NewTicker(timeUnit)
 	wheel := impl.NewHierarchyTimeWheel(1*timeUnit, 20, ticker)
+	wheel.Start()
 
+	demonstrateDelayTaskH(wheel)
+
+	select {}
+
+}
+
+func demonstrateDelayTaskH(tw *impl.HierarchyTimeWheel) {
 	task := &timewheel.SimpleDelayTask{
 		BaseDelayTask: timewheel.BaseDelayTask{
 			Interval: 3 * time.Second,
@@ -24,14 +32,9 @@ func main() {
 		},
 	}
 
-	wheel.Start()
-
 	for {
-		wheel.AddTask(task)
+		tw.AddTask(task)
 		fmt.Println("Add New Task !!, Now Time is: ", time.Now().Local())
 		time.Sleep(4 * time.Second)
 	}
-
-	select {}
-
 }

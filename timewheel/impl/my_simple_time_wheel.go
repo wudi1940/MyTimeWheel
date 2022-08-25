@@ -3,7 +3,6 @@ package impl
 import (
 	"TimeWheel/timewheel"
 	"TimeWheel/utils"
-	"fmt"
 	"time"
 )
 
@@ -37,9 +36,8 @@ func (tw *MySimpleTimeWheel) Start() {
 	go func() {
 		for {
 			select {
-			case t := <-ticker.C:
-
-				fmt.Println("Current Time: ", t, " CurPoz: ", tw.CurrentPoz)
+			case <-ticker.C:
+				//fmt.Println("Current Time: ", t, " CurPoz: ", tw.CurrentPoz)
 				go tw.run()
 			}
 		}
@@ -70,8 +68,6 @@ func (tw MySimpleTimeWheel) AddTask(task interface{}) {
 	iTask := task.(*timewheel.SimpleDelayTask)
 	iTask.Circle = uint64(iTask.Interval/tw.Interval) / tw.Size
 	iTask.Pos = (tw.CurrentPoz + uint64(iTask.Interval/tw.Interval)) % tw.Size
-
-	fmt.Println("Add New Task !!, Now Time is: ", time.Now().Local(), " CurrentPoz: ", tw.CurrentPoz, " TaskPoz: ", iTask.Pos)
 	tw.Slot[iTask.Pos] = append(tw.Slot[iTask.Pos], iTask)
 }
 
